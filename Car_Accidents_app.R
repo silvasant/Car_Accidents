@@ -95,7 +95,7 @@ server <- function(input, output) {
       ) %>%
       addMarkers(data = points())
   })
-  
+  ## so far it works ok
   
   
   
