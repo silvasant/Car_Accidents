@@ -63,7 +63,9 @@ ui <- dashboardPage(
                   tabPanel("Tab1",
                            "Currently selected tab from first box:",
                            verbatimTextOutput("tabset1Selected")),
-                  tabPanel("Tab2", "Tab content 2")
+                  tabPanel("Map output test", leafletOutput("mymap"),
+                           p(),
+                           actionButton("recalc", "New points"))
                 )
         )
       )
@@ -82,18 +84,18 @@ server <- function(input, output) {
   output$tabset1Selected <- renderText({
     input$tabset1
   })
-  # library(DBI)
-  # con <- dbConnect(odbc::odbc(), .connection_string = "Driver={MySQL ODBC 8.0 Unicode Driver};",
-  #                  Database  = 'uk_car_accidents_',
-  #                  UID       = 'root',
-  #                  PWD       = 'donald_7rump$ismyh0m3boy',
-  #                  Port      = 3306)
-  # 
-  # on.exit(dbDisconnect(conn=con), add = TRUE)
-  # sql <- "SELECT * FROM City WHERE ID = ?id1 OR ID = ?id2 OR ID = ?id3;"
-  # query <- sqlInterpolate(conn = con, sql, id1 = input$ID1,
-  #                         id2 = input$ID2, id3 = input$ID3)
-  # dbGetQuery(conn, query)
+  points <- eventReactive(input$recalc, {
+    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
+  }, ignoreNULL = FALSE)
+  
+  output$mymap <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$Stamen.TonerLite,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) %>%
+      addMarkers(data = points())
+  })
+  
   
   
   
