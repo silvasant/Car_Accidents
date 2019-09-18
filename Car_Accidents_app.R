@@ -81,9 +81,9 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   # The currently selected tab from the first box
-  output$tabset1Selected <- renderText({
-    input$tabset1
-  })
+  # output$tabset1Selected <- renderText({
+  #   input$tabset1
+  # })
   points <- eventReactive(input$recalc, {
     cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
   }, ignoreNULL = FALSE)
