@@ -1,6 +1,8 @@
 ## Data input
 
 library(readr)
+#library(sf)
+#source('API_info.R')
 Acc <- read_csv("Project Data/Acc.csv", col_types = cols(Accident_Index = col_character(), 
       Date = col_date(format = "%d/%m/%Y"), 
       Time = col_time(format = "%H:%M")))
@@ -23,5 +25,6 @@ Veh_df$Vehicle_Type_categorical_abbreviated<-ifelse(Veh_df$Vehicle_Type_categori
 Veh_df$Vehicle_Type_categorical_abbreviated<-ifelse(Veh_df$Vehicle_Type_categorical_abbreviated %in% c(10,11),'Transporte de pasajeros',Veh_df$Vehicle_Type_categorical_abbreviated)
 Veh_df$Vehicle_Type_categorical_abbreviated<-ifelse(Veh_df$Vehicle_Type_categorical_abbreviated %in% c(20,21,19,98),'Transporte de bienes',Veh_df$Vehicle_Type_categorical_abbreviated)
 Veh_df$Vehicle_Type_categorical_abbreviated<-ifelse(Veh_df$Vehicle_Type_categorical_abbreviated %in% c(-1),'S/D',Veh_df$Vehicle_Type_categorical_abbreviated)
-
+Veh_df$Month<-str_to_sentence(month(Veh_df$Date,label = T,abbr = F))
+Veh_df$Amort<-(1-.2)^Veh_df$Age_of_Vehicle
 
