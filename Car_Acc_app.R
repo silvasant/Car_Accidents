@@ -149,7 +149,7 @@ server <- function(input, output) {
       addCircleMarkers(radius = ~ifelse(Vehicle_Type_categorical_abbreviated == "Autos", 10, 6),
                        color = ~pal(Vehicle_Type_categorical_abbreviated),
                        stroke = T, fillOpacity = 0.5
-                       ,popup = ~District_Name,
+                       ,label = ~District_Name,
                        clusterOptions = markerClusterOptions()
       )
   })
