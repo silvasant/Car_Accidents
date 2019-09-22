@@ -16,7 +16,7 @@ library(shinydashboard)
 ### BUFFER ZONE
 
 ## Data loading
-source('C:/Users/santi/Desktop/R/Projects/Car_Accidents/Data_preloading.R')
+source('Data_preloading.R')
 
 Vehice_TYPES<-unique(Veh_df$Vehicle_Type_categorical_abbreviated)
 
@@ -41,7 +41,7 @@ ui <- dashboardPage(
         # First tab content
         tabItem(tabName = "Primer_vistazo",
                 fluidRow(
-                  box(leafletOutput("mymap", height = 750)),
+                  box(leafletOutput(outputId = "mymap"),height = 12),
                   
                   box(
                     title = h2("Controles"),
