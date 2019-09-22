@@ -87,15 +87,22 @@ ui <- dashboardPage(
                               value = '2017-01-31'
                               ),
                       checkboxGroupInput("checkgroup",h4('Tipo de vehiculo'),
-          # choices = list('Otros'=c(1,16,22,17,90),'Motos'=c(2:5,18,23,97),'Transporte de pasajeros'=c(10,11),'Transporte de bienes'=c(20,21,19,98),'S/D'=-1)
-                              choices = list('Autos'='Autos','Motos'='Motos')
+                              choices = list('Autos'='Autos','Motos'='Motos'),selected = 'Autos'
                               )),
                     column(4,
                       numericInput('cars',label = h4('Valor promedio autos:'),min = 0,max=999999,value=50000),
-                      numericInput('bikes',label = h4('Valor promedio motos:'),min = 0,max=999999,value=5000)),
+                      numericInput('bikes',label = h4('Valor promedio motos:'),min = 0,max=999999,value=5000)
+                      ,
+                      selectInput("segment",h4('Segmentar por:'),
+                                         choices = list('Edad del conductor'='Age_of_Driver_bucket',
+                                                        'Ubicacion'='District_Name',
+                                                        'Mes'='Month'),selected = 'Ubicacion'
+                      )
+                      ),
                   column(4,
                       numericInput('number_of_cars',label = h4('N° de autos:'),min = 0,max=9999999,value=100000),
                       numericInput('number_of_bikes',label = h4('N° de motos :'),min = 0,max=9999999,value=5000))
+                  
                       ),
                     box(h2('Pricing'),verbatimTextOutput(
                       'tables'
@@ -114,16 +121,7 @@ ui <- dashboardPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  # The currently selected tab from the first box
-  # output$tabset1Selected <- renderText({
-  #   input$tabset1
-  # })
   
-  # points <- eventReactive(input$recalc, {Sample<-sample(1:nrow(Acc),100);
-  #   cbind(Acc$Longitude[Sample],Acc$Latitude[Sample] )
-  # }, ignoreNULL = FALSE)
-  
-
   output$mymap <- renderLeaflet({
     leaflet() %>%
     addProviderTiles(providers$Stamen.TonerLite,
@@ -154,49 +152,119 @@ server <- function(input, output) {
   
   
   output$tables<-renderPrint({
+    
     if('Autos'%in%input$checkgroup){
-      Table_out<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                               Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Month))/input$number_of_cars)*mean(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                       Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Amort))*input$cars,
+      Table_Mes<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                               Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Month))/input$number_of_cars)*input$cars,
       'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
                                                          Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Month))/input$number_of_cars)
+      ) %>% pull(Month)))
     }
     
     if('Motos'%in%input$checkgroup){
-      Table_out<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+      Table_Mes<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
                                                                                Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Month))/input$number_of_bikes)*mean(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                       Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Amort))*input$bikes,
+      ) %>% pull(Month))/input$number_of_bikes)*input$bikes,
       'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
                                                          Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Month))/input$number_of_bikes)
+      ) %>% pull(Month)))
     }
     
     if('Autos'%in%input$checkgroup&'Motos'%in%input$checkgroup){
-      Table_out<-list('Autos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                                               Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Month))/input$number_of_cars)*mean(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                       Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Amort))*input$cars,
+      Table_Mes<-list('Autos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                            Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Month))/input$number_of_cars)*input$cars,
       'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
                                                          Vehicle_Type_categorical_abbreviated=='Autos'
-      ) %>% pull(Month))/input$number_of_cars)
+      ) %>% pull(Month)))
       ,
       'Motos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                               Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Month))/input$number_of_bikes)*mean(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
-                                                                        Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Amort))*input$bikes,
+                                                                            Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(Month))/input$number_of_bikes)*input$bikes,
       'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
                                                          Vehicle_Type_categorical_abbreviated=='Motos'
-      ) %>% pull(Month))/input$number_of_bikes)
+      ) %>% pull(Month)))
       )
     }
-    print(Table_out)
+    
+    if('Autos'%in%input$checkgroup){
+      Table_Ubicacion<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                     Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(District_Name))/input$number_of_cars)*input$cars,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(District_Name)))
+    }
+    
+    if('Motos'%in%input$checkgroup){
+      Table_Ubicacion<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                     Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(District_Name))/input$number_of_bikes)*input$bikes,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(District_Name)))
+    }
+    
+    if('Autos'%in%input$checkgroup&'Motos'%in%input$checkgroup){
+      Table_Ubicacion<-list('Autos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                                  Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(District_Name))/input$number_of_cars)*input$cars,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(District_Name)))
+      ,
+      'Motos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                            Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(District_Name))/input$number_of_bikes)*input$bikes,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(District_Name)))
+      )
+    }
+    
+    
+    if('Autos'%in%input$checkgroup){
+      Table_Edad<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Age_of_Driver_bucket))/input$number_of_cars)*input$cars,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Age_of_Driver_bucket)))
+    }
+    
+    if('Motos'%in%input$checkgroup){
+      Table_Edad<-list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(Age_of_Driver_bucket))/input$number_of_bikes)*input$bikes,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(Age_of_Driver_bucket)))
+    }
+    
+    if('Autos'%in%input$checkgroup&'Motos'%in%input$checkgroup){
+      Table_Edad<-list('Autos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                                             Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Age_of_Driver_bucket))/input$number_of_cars)*input$cars,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Autos'
+      ) %>% pull(Age_of_Driver_bucket)))
+      ,
+      'Motos'=list('Prima pura promedio estimada'=(table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                                            Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(Age_of_Driver_bucket))/input$number_of_bikes)*input$bikes,
+      'Siniestralidad estimada'=table(Veh_df %>%  filter(Date>=input$date21&Date<=input$date22,
+                                                         Vehicle_Type_categorical_abbreviated=='Motos'
+      ) %>% pull(Age_of_Driver_bucket)))
+      )
+    }
+    
+    if(input$segment=='Month'){Table_final<-Table_Mes}
+    if(input$segment=='District_Name'){Table_final<-Table_Ubicacion}
+    if(input$segment=='Age_of_Driver_bucket'){Table_final<-Table_Edad}
+    
+    
+    print(Table_final)
   },width = 1200)
  
 }
