@@ -20,12 +20,6 @@ source('C:/Users/santi/Desktop/R/Projects/Car_Accidents/Data_preloading.R')
 
 Vehice_TYPES<-unique(Veh_df$Vehicle_Type_categorical_abbreviated)
 
-## Connection setup
-# con <- dbConnect(odbc::odbc(), .connection_string = "Driver={MySQL ODBC 8.0 Unicode Driver};",
-#                  Database  = 'uk_car_accidents_',
-#                  UID       = 'root',
-#                  PWD       = 'donald_7rump$ismyh0m3boy',
-#                  Port      = 3306)
 
 
 ### FRONT
