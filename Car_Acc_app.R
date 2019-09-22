@@ -137,18 +137,22 @@ server <- function(input, output) {
   })  
   
   
+  pal <- colorFactor(c("navy", "red"), domain = c("Autos", "Motos"))
   output$mymap1 <- renderLeaflet({
-    leaflet() %>%
+    leaflet(Veh_df %>% filter((Date>=input$date21&Date<=input$date22),
+                              Vehicle_Type_categorical_abbreviated%in%input$checkgroup) %>% 
+              select(Longitude,Latitude,Vehicle_Type_categorical_abbreviated,District_Name)
+    ) %>%
       addProviderTiles(providers$Stamen.TonerLite,
                        options = providerTileOptions(noWrap = TRUE)
       ) %>%
-      addMarkers(data =   cbind(
-        Veh_df$Longitude[(Veh_df$Date>=input$date21&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)],
-        Veh_df$Latitude[(Veh_df$Date>=input$date1&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)])
-        ,
-        clusterOptions = markerClusterOptions())
+      addCircleMarkers(radius = ~ifelse(Vehicle_Type_categorical_abbreviated == "Autos", 10, 6),
+                       color = ~pal(Vehicle_Type_categorical_abbreviated),
+                       stroke = T, fillOpacity = 0.5
+                       ,popup = ~District_Name,
+                       clusterOptions = markerClusterOptions()
+      )
   })
-
   
   
   output$tables<-renderPrint({
