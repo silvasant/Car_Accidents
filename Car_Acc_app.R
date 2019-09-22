@@ -143,8 +143,8 @@ server <- function(input, output) {
                        options = providerTileOptions(noWrap = TRUE)
       ) %>%
       addMarkers(data =   cbind(
-        Acc$Longitude[(Veh_df$Date>=input$date21&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)],
-        Acc$Latitude[(Veh_df$Date>=input$date1&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)])
+        Veh_df$Longitude[(Veh_df$Date>=input$date21&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)],
+        Veh_df$Latitude[(Veh_df$Date>=input$date1&Veh_df$Date<=input$date22&Veh_df$Vehicle_Type_categorical_abbreviated%in%input$checkgroup)])
         ,
         clusterOptions = markerClusterOptions())
   })
